@@ -1,0 +1,29 @@
+// Excerpted from: go doc -all archive/zip
+
+CONSTANTS
+
+const (
+        Store   uint16 = 0 // no compression
+        Deflate uint16 = 8 // DEFLATE compressed
+)
+    Compression methods.
+
+
+VARIABLES
+
+var (
+        ErrFormat    = errors.New("zip: not a valid zip file")
+        ErrAlgorithm = errors.New("zip: unsupported compression algorithm")
+        ErrChecksum  = errors.New("zip: checksum error")
+)
+
+type ReadCloser struct {
+        Reader
+        // Has unexported fields.
+}
+
+func OpenReader(name string) (*ReadCloser, error)
+    OpenReader will open the Zip file specified by name and return a ReadCloser.
+
+func (rc *ReadCloser) Close() error
+    Close closes the Zip file, rendering it unusable for I/O.

@@ -1,0 +1,8 @@
+archive/zip         Store   uint16 = 0 // no compression
+archive/zip         Deflate uint16 = 8 // DEFLATE compressed
+archive/zip         ErrFormat    = errors.New("zip: not a valid zip file")
+archive/zip         ErrAlgorithm = errors.New("zip: unsupported compression algorithm")
+archive/zip         ErrChecksum  = errors.New("zip: checksum error")
+archive/zip type ReadCloser struct {
+archive/zip func OpenReader(name string) (*ReadCloser, error)
+archive/zip func (rc *ReadCloser) Close() error
