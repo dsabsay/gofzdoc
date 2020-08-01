@@ -5,7 +5,9 @@ NOTES
 
 TODO
 ----
-- Support third-party libraries via go.mod (store indexes for different projects based on directory)
+- Add option to show the package "root" in preview window (with a keybinding or special character in the search)
+- Provide way to browse the examples and introductory docs for a package.
+- remove logr
 - Set up easy installation procedure
 - User docs
 - Write more tests
@@ -15,3 +17,4 @@ TODO
 DONE
 ----
 - Use fzf preview feature
+- Support third-party libraries via go.mod (store indexes for different projects based on directory)
