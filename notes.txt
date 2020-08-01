@@ -1,0 +1,17 @@
+NOTES
+-----
+- Wow, the fzf man page is really well written and organized. An example to follow, for sure!
+
+
+TODO
+----
+- Support third-party libraries via go.mod (store indexes for different projects based on directory)
+- Set up easy installation procedure
+- User docs
+- Write more tests
+- Fix my auto-complete and/or merge my vim config with work laptop...
+
+
+DONE
+----
+- Use fzf preview feature

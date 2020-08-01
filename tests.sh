@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-source ./gofzdoc.sh
+source ./gofzdoc-lib.sh
 set +x
 set -euo pipefail
 
