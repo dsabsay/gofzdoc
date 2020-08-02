@@ -1,7 +1,4 @@
 #!/bin/bash
-# set +euo pipefail
-# source ./logr.bash
-# logr start
 set -euo pipefail
 
 INDEX_DIR="$HOME/.gofzdoc/cache"
@@ -9,6 +6,8 @@ INDEX_DIR="$HOME/.gofzdoc/cache"
 SCRIPTPATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 ; pwd -P)/$(basename "${BASH_SOURCE[0]}")"
 GOFZDOC_ENABLE_PREVIEW_WRAP=${GOFZDOC_ENABLE_PREVIEW_WRAP:-0}
 GOFZDOC_ENABLE_PREVIEW_BAT=${GOFZDOC_ENABLE_PREVIEW_BAT:-0}
+GOFZDOC_OPEN_BROWSER_URL=${GOFZDOC_OPEN_BROWSER_URL:-https://godoc.org/}
+GOFZDOC_OPEN_BROWSER_URL=${GOFZDOC_OPEN_BROWSER_URL%/}
 
 function get_pkg_and_symbol() {
     # Quoting a regex in [[  ]] may break, so should always store it in a variable,
@@ -138,11 +137,12 @@ function gofzdoc_run() {
         fi
     fi
 
+    indexes=("${INDEX_DIR}/${go_version}.txt")
     if [[ -f go.mod ]]; then
-        thing=$(cat "${INDEX_DIR}/${go_version}.txt" "${INDEX_DIR}/${mod_index}.txt" | fzf --preview "source ${SCRIPTPATH} && gofzdoc_preview {}")
-    else
-        thing=$(fzf --preview "source ${SCRIPTPATH} && gofzdoc_preview {}" < "${INDEX_DIR}/${go_version}.txt")
+        indexes+=("${INDEX_DIR}/${mod_index}.txt")
     fi
+
+    thing=$(cat "${indexes[@]}" | fzf --preview "source ${SCRIPTPATH} && gofzdoc_preview {}" --bind "ctrl-x:execute-silent(source ${SCRIPTPATH} && gofzdoc_open_browser {})")
     go doc $(get_pkg_and_symbol "$thing")
 }
 
@@ -150,6 +150,13 @@ function gofzdoc_preview() {
     go doc $(get_pkg_and_symbol "$1") \
         | if [[ "$GOFZDOC_ENABLE_PREVIEW_WRAP" == 1 ]]; then fmt -w $FZF_PREVIEW_COLUMNS; else cat; fi \
         | if [[ "$GOFZDOC_ENABLE_PREVIEW_BAT" == 1 ]]; then bat --wrap auto --terminal-width $COLUMNS --color always --plain --language go; else cat; fi
+}
+
+function gofzdoc_open_browser() {
+    pkg_space_symbol=$(get_pkg_and_symbol "$1")
+    path="${pkg_space_symbol/ /#}"
+    echo $path
+    open "${GOFZDOC_OPEN_BROWSER_URL}/${path}"
 }
 
 function gofzdoc-clear-cache() {

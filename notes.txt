@@ -5,12 +5,13 @@ NOTES
 
 TODO
 ----
-- Add option to show the package "root" in preview window (with a keybinding or special character in the search)
-- Provide way to browse the examples and introductory docs for a package.
+- Hide common module prefixes (github.com, golang.org, etc.)
 - remove logr
 - Set up easy installation procedure
 - User docs
 - Write more tests
+- Add option to show the package "root" in preview window (with a keybinding or special character in the search)
+- Provide way to browse the examples and introductory docs for a package.
 - Fix my auto-complete and/or merge my vim config with work laptop...
 
 
@@ -18,3 +19,4 @@ DONE
 ----
 - Use fzf preview feature
 - Support third-party libraries via go.mod (store indexes for different projects based on directory)
+- Provide keybinding to open doc page on go.dev/godoc.org
