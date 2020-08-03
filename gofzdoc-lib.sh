@@ -1,15 +1,15 @@
 #!/bin/bash
 set -euo pipefail
 
-INDEX_DIR="$HOME/.gofzdoc/cache"
+GOFZDOC_INDEX_DIR="$HOME/.gofzdoc/cache"
 # See: https://stackoverflow.com/a/9107028
-SCRIPTPATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 ; pwd -P)/$(basename "${BASH_SOURCE[0]}")"
+GOFZDOC_LIB_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 ; pwd -P)/$(basename "${BASH_SOURCE[0]}")"
 GOFZDOC_ENABLE_PREVIEW_WRAP=${GOFZDOC_ENABLE_PREVIEW_WRAP:-0}
 GOFZDOC_ENABLE_PREVIEW_BAT=${GOFZDOC_ENABLE_PREVIEW_BAT:-0}
 GOFZDOC_OPEN_BROWSER_URL=${GOFZDOC_OPEN_BROWSER_URL:-https://godoc.org/}
 GOFZDOC_OPEN_BROWSER_URL=${GOFZDOC_OPEN_BROWSER_URL%/}
 
-function get_pkg_and_symbol() {
+function __gofzdoc_get_pkg_and_symbol() {
     # Quoting a regex in [[  ]] may break, so should always store it in a variable,
     # then reference _unquoted_ in the conditional.
     # See: http://mywiki.wooledge.org/BashGuide/Patterns
@@ -29,7 +29,7 @@ function get_pkg_and_symbol() {
 
 # Executes command given by $1, applies filters, and echos output to stdout.
 # $2 is prepended to each line.
-function gofzdoc_filter() {
+function __gofzdoc_filter() {
     # Get vars and consts
     eval $1 | grep -E '^[[:space:]]*[a-zA-Z0-9_]+\s+(.+)?=' | sed -E "s|.*|$2 &|" || true
     # Get types
@@ -39,9 +39,9 @@ function gofzdoc_filter() {
 }
 
 # Builds index for version number supplied by $1
-function gofzdoc_build_index() {
-    cache=${INDEX_DIR}/${1}.txt
-    mkdir -p ${INDEX_DIR}
+function __gofzdoc_build_index() {
+    cache=${GOFZDOC_INDEX_DIR}/${1}.txt
+    mkdir -p ${GOFZDOC_INDEX_DIR}
     > "$cache"
 
     pkgs=()
@@ -55,7 +55,7 @@ function gofzdoc_build_index() {
     for pkg in "${pkgs[@]}"
     do
         echo -en "\rScanning package $i/$num_pkgs"
-        gofzdoc_filter "go doc -all $pkg" "$pkg" >> "$cache"
+        __gofzdoc_filter "go doc -all $pkg" "$pkg" >> "$cache"
         ((i++))
     done
     echo
@@ -63,11 +63,11 @@ function gofzdoc_build_index() {
 }
 
 # Builds index from the go.mod file in the current directory.
-function gofzdoc_build_mod_index() {
+function __gofzdoc_build_mod_index() {
     out=$(cksum go.mod)
     sum=${out%% *}
-    cache=${INDEX_DIR}/${sum}.txt
-    mkdir -p ${INDEX_DIR}
+    cache=${GOFZDOC_INDEX_DIR}/${sum}.txt
+    mkdir -p ${GOFZDOC_INDEX_DIR}
     > "$cache"
 
     allpkgs=()
@@ -103,14 +103,14 @@ function gofzdoc_build_mod_index() {
     do
         echo -en "\rScanning package $i/$num_pkgs"
         mod_id=${mod%% *}  # strip the version number off
-        gofzdoc_filter "go doc -all $pkg" "$pkg" >> "$cache"
+        __gofzdoc_filter "go doc -all $pkg" "$pkg" >> "$cache"
         ((i++))
     done
     echo
     echo "Index for go.mod built."
 }
 
-function gofzdoc_run() {
+function __gofzdoc_run() {
     type go >/dev/null 2>&1 || { echo >&2 "The go tool must be installed."; exit 1; }
     type fzf >/dev/null 2>&1 || { echo >&2 "fzf must be installed to use this."; exit 1; }
 
@@ -120,45 +120,45 @@ function gofzdoc_run() {
         return 1
     fi
     go_version="${BASH_REMATCH[1]}"
-    if [[ ! -r "${INDEX_DIR}/${go_version}.txt" ]]; then
+    if [[ ! -r "${GOFZDOC_INDEX_DIR}/${go_version}.txt" ]]; then
         echo "No index found for go version $go_version."
         echo "Building index now. This may take a minute, but will only happen once per go version."
-        gofzdoc_build_index "$go_version"
+        __gofzdoc_build_index "$go_version"
     fi
     mod_index=""
     if [[ -f go.mod ]]; then
         out=$(cksum go.mod)
         sum=${out%% *}
         mod_index=$sum
-        if [[ ! -r "${INDEX_DIR}/${sum}.txt" ]]; then
+        if [[ ! -r "${GOFZDOC_INDEX_DIR}/${sum}.txt" ]]; then
             echo "No index found for go.mod"
             echo "Building index for go.mod now. This must be done every time go.mod changes."
-            gofzdoc_build_mod_index
+            __gofzdoc_build_mod_index
         fi
     fi
 
-    indexes=("${INDEX_DIR}/${go_version}.txt")
+    indexes=("${GOFZDOC_INDEX_DIR}/${go_version}.txt")
     if [[ -f go.mod ]]; then
-        indexes+=("${INDEX_DIR}/${mod_index}.txt")
+        indexes+=("${GOFZDOC_INDEX_DIR}/${mod_index}.txt")
     fi
 
-    thing=$(cat "${indexes[@]}" | fzf --preview "source ${SCRIPTPATH} && gofzdoc_preview {}" --bind "ctrl-x:execute-silent(source ${SCRIPTPATH} && gofzdoc_open_browser {})")
-    go doc $(get_pkg_and_symbol "$thing")
+    thing=$(cat "${indexes[@]}" | fzf --preview "source ${GOFZDOC_LIB_PATH} && __gofzdoc_preview {}" --bind "ctrl-x:execute-silent(source ${GOFZDOC_LIB_PATH} && __gofzdoc_open_browser {})")
+    go doc $(__gofzdoc_get_pkg_and_symbol "$thing")
 }
 
-function gofzdoc_preview() {
-    go doc $(get_pkg_and_symbol "$1") \
+function __gofzdoc_preview() {
+    go doc $(__gofzdoc_get_pkg_and_symbol "$1") \
         | if [[ "$GOFZDOC_ENABLE_PREVIEW_WRAP" == 1 ]]; then fmt -w $FZF_PREVIEW_COLUMNS; else cat; fi \
         | if [[ "$GOFZDOC_ENABLE_PREVIEW_BAT" == 1 ]]; then bat --wrap auto --terminal-width $COLUMNS --color always --plain --language go; else cat; fi
 }
 
-function gofzdoc_open_browser() {
-    pkg_space_symbol=$(get_pkg_and_symbol "$1")
+function __gofzdoc_open_browser() {
+    pkg_space_symbol=$(__gofzdoc_get_pkg_and_symbol "$1")
     path="${pkg_space_symbol/ /#}"
     echo $path
     open "${GOFZDOC_OPEN_BROWSER_URL}/${path}"
 }
 
 function gofzdoc-clear-cache() {
-    rm ${INDEX_DIR}/*
+    rm ${GOFZDOC_INDEX_DIR}/*
 }
