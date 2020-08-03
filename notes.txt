@@ -9,6 +9,8 @@ NOTES
 
 TODO
 ----
+- Add brief explanation of how indexes are built and how the semantics of the go command itself carries over for the most part.
+    - Can probably explain easily by showing which go commands are used to get package/module lists
 - Fix version number in script (still at 0.0.0)
 - Create make target for releasing new version
 - Write more tests
