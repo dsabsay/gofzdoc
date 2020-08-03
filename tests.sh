@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-source ./gofzdoc-lib.sh
+source ./gofzdoc
 set +x
 set -euo pipefail
 
@@ -53,8 +53,8 @@ function test_get_pkg_and_symbol() {
 function test_gofzdoc_filter() {
     mkdir -p tmp/
     cd tmp/
-    __gofzdoc_filter "cat ../all.txt" "archive/zip" > all.out
-    diff ../all.expect all.out
+    __gofzdoc_filter "cat ../tests/all.txt" "archive/zip" > all.out
+    diff ../tests/all.expect all.out
 }
 
 test_get_pkg_and_symbol

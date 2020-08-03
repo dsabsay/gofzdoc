@@ -8,6 +8,7 @@ GOFZDOC_ENABLE_PREVIEW_WRAP=${GOFZDOC_ENABLE_PREVIEW_WRAP:-0}
 GOFZDOC_ENABLE_PREVIEW_BAT=${GOFZDOC_ENABLE_PREVIEW_BAT:-0}
 GOFZDOC_OPEN_BROWSER_URL=${GOFZDOC_OPEN_BROWSER_URL:-https://godoc.org/}
 GOFZDOC_OPEN_BROWSER_URL=${GOFZDOC_OPEN_BROWSER_URL%/}
+GOFZDOC_VERSION=0.0.0
 
 function __gofzdoc_get_pkg_and_symbol() {
     # Quoting a regex in [[  ]] may break, so should always store it in a variable,
@@ -89,7 +90,7 @@ function __gofzdoc_build_mod_index() {
     pkgs=()
     for pkg in "${allpkgs[@]}"; do
         for mod in "${mods[@]}"; do
-            if [[ "$pkg" =~ "$mod" ]]; then
+            if [[ "$pkg" =~ $mod ]]; then
                 pkgs+=("$pkg")
                 break
             fi
@@ -159,6 +160,51 @@ function __gofzdoc_open_browser() {
     open "${GOFZDOC_OPEN_BROWSER_URL}/${path}"
 }
 
-function gofzdoc-clear-cache() {
+function __gofzdoc_clear_cache() {
     rm ${GOFZDOC_INDEX_DIR}/*
 }
+
+function __gofzdoc_usage() {
+    fmt <<EOF
+Usage: gofzdoc [-h | --help] [-v | --version]
+
+Environment variables:
+    GOFZDOC_ENABLE_PREVIEW_WRAP
+        Set to "1" to enable line wrapping in the preview window. This doesn't work well for some docs so it's disabled by default.
+    GOFZDOC_ENABLE_PREVIEW_BAT
+        Enable syntax highlighting using bat (https://github.com/sharkdp/bat).
+    GOFZDOC_OPEN_BROWSER_URL
+        Which base URL to open with Ctrl-x. Default is https://godoc.org/
+
+Sub-commands:
+    clear-cache - clear the index cache
+EOF
+}
+
+function __gofzdoc_main() {
+    if [[ $# -ge 1 ]]; then
+        case "$1" in
+            clear-cache)
+                __gofzdoc_clear_cache
+                exit 0
+                ;;
+            --version | -v)
+                echo "gofzdoc $GOFZDOC_VERSION"
+                exit 0
+                ;;
+            --help | -h)
+                __gofzdoc_usage
+                exit 0
+                ;;
+            *)
+                __gofzdoc_usage
+                exit 0
+                ;;
+        esac
+    fi
+
+    __gofzdoc_run
+}
+
+# If sourced, simply return (used to run tests)
+return 2>/dev/null || __gofzdoc_main "$@"

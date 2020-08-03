@@ -1,6 +1,7 @@
 WILO
 ----
 
+
 NOTES
 -----
 - Wow, the fzf man page is really well written and organized. An example to follow, for sure!
@@ -22,3 +23,5 @@ DONE
 - Use fzf preview feature
 - Support third-party libraries via go.mod (store indexes for different projects based on directory)
 - Provide keybinding to open doc page on go.dev/godoc.org
+- Combine into single script to make it easier to install?
+- Make clear-cache a sub command
