@@ -9,12 +9,12 @@ NOTES
 
 TODO
 ----
-- User docs
+- Fix version number in script (still at 0.0.0)
+- Create make target for releasing new version
 - Write more tests
 - Hide common module prefixes (github.com, golang.org, etc.)
 - Add option to show the package "root" in preview window (with a keybinding or special character in the search)
 - Provide way to browse the examples and introductory docs for a package.
-- Fix my auto-complete and/or merge my vim config with work laptop...
 
 
 DONE
@@ -26,3 +26,4 @@ DONE
 - Make clear-cache a sub command
 - Set up easy installation procedure
 - Enable syntax highlighting by default. Just check if bat is installed.
+- User docs
