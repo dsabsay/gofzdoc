@@ -9,7 +9,6 @@ NOTES
 
 TODO
 ----
-- Set up easy installation procedure
 - User docs
 - Write more tests
 - Hide common module prefixes (github.com, golang.org, etc.)
@@ -25,3 +24,5 @@ DONE
 - Provide keybinding to open doc page on go.dev/godoc.org
 - Combine into single script to make it easier to install?
 - Make clear-cache a sub command
+- Set up easy installation procedure
+- Enable syntax highlighting by default. Just check if bat is installed.

@@ -5,7 +5,7 @@ GOFZDOC_INDEX_DIR="$HOME/.gofzdoc/cache"
 # See: https://stackoverflow.com/a/9107028
 GOFZDOC_LIB_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 ; pwd -P)/$(basename "${BASH_SOURCE[0]}")"
 GOFZDOC_ENABLE_PREVIEW_WRAP=${GOFZDOC_ENABLE_PREVIEW_WRAP:-0}
-GOFZDOC_ENABLE_PREVIEW_BAT=${GOFZDOC_ENABLE_PREVIEW_BAT:-0}
+GOFZDOC_ENABLE_PREVIEW_BAT=${GOFZDOC_ENABLE_PREVIEW_BAT:-1}
 GOFZDOC_OPEN_BROWSER_URL=${GOFZDOC_OPEN_BROWSER_URL:-https://godoc.org/}
 GOFZDOC_OPEN_BROWSER_URL=${GOFZDOC_OPEN_BROWSER_URL%/}
 GOFZDOC_VERSION=0.0.0
@@ -148,9 +148,15 @@ function __gofzdoc_run() {
 }
 
 function __gofzdoc_preview() {
+    if type bat >/dev/null 2>&1; then
+        has_bat=1
+    else
+        has_bat=0
+    fi
+
     go doc $(__gofzdoc_get_pkg_and_symbol "$1") \
         | if [[ "$GOFZDOC_ENABLE_PREVIEW_WRAP" == 1 ]]; then fmt -w $FZF_PREVIEW_COLUMNS; else cat; fi \
-        | if [[ "$GOFZDOC_ENABLE_PREVIEW_BAT" == 1 ]]; then bat --wrap auto --terminal-width $COLUMNS --color always --plain --language go; else cat; fi
+        | if [[ "$GOFZDOC_ENABLE_PREVIEW_BAT" == 1 && $has_bat == 1 ]]; then bat --wrap auto --terminal-width $COLUMNS --color always --plain --language go; else cat; fi
 }
 
 function __gofzdoc_open_browser() {
